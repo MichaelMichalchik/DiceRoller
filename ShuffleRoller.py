@@ -5,11 +5,13 @@ import tkinter as tk
 # Global variable to store the shuffled deck and the current index
 shuffled_deck = []
 current_index = 0
+last_3=[]
 
 # Function to shuffle a deck of numbers from 1 to 20
 def shuffle_deck():
     global shuffled_deck
     global current_index
+    global last_3
     shuffled_deck = list(range(1, 21))
     random.shuffle(shuffled_deck)
     current_index = 0
@@ -22,14 +24,15 @@ def draw_number():
     if current_index >= len(shuffled_deck):
         shuffle_deck()  # Refill the deck if empty
     drawn_number = shuffled_deck[current_index]
+    last_3.append(drawn_number)
+    if len(last_3) > 3:
+        last_3.pop(0)
+        
     current_index += 1
     
     existing_text = drawn_numbers_label.cget("text")
-    existing_text_list=existing_text.split()
-    current_index_3=current_index-3
-    current_index_2=current_index-2
-    new_text = f"{existing_text_list[current_index_3]} {existing_text_list[current_index_2]}{drawn_number}"
-    drawn_numbers_label.config(text=new_text)
+    
+    drawn_numbers_label.config(text=last_3)
 
 # Create the main application window and set its title
 window = tk.Tk()
