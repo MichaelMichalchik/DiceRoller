@@ -3,6 +3,7 @@ import random
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import messagebox
 
 # Global variable to store the shuffled deck and the current index
 shuffled_deck = []
@@ -15,6 +16,19 @@ number_counts = [0] * 20  # A list of 20 zeros
 window = tk.Tk()
 window.title("Shuffle Deck Die Roller")
 window.geometry("620x300")  # Resize the window
+#Number of draws text box
+draws_label = tk.Label(window, text="Enter number of draws:")
+draws_label.pack(pady=5)
+draws_entry = tk.Entry(window)
+draws_entry.pack(pady=5)
+reshuffle_label = tk.Label(window, text="Enter number of draws before reshuffle:")
+reshuffle_label.pack(pady=5)
+reshuffle_entry = tk.Entry(window)
+reshuffle_entry.pack(pady=5)
+# Create labels to display the deck status and drawn numbers
+deck_label = tk.Label(window, text="Deck is empty.")
+deck_label.pack(pady=10)
+
 
 # Matplotlib Figure and Canvas Setup
 fig, ax = plt.subplots(figsize=(5, 3))  # This will hold our plot
@@ -50,33 +64,72 @@ def shuffle_deck():
 def draw_number():
     global shuffled_deck
     global current_index
-    if current_index >= len(shuffled_deck):
-        shuffle_deck()  # Refill the deck if empty
+    global last_20
+    global number_counts
+    
+    if current_index >= len(shuffled_deck):  # This should ideally never happen
+        shuffle_deck()
     drawn_number = shuffled_deck[current_index]
     number_counts[drawn_number - 1] += 1
-    update_histogram() 
     last_20.append(drawn_number)
     if len(last_20) > 20:
         last_20.pop(0)
-        
     current_index += 1
-    
-    existing_text = drawn_numbers_label.cget("text")
-    
-    drawn_numbers_label.config(text=last_20)
-    
 
-# Create buttons to shuffle the deck and draw a number
+def clear_program():
+    global shuffled_deck, current_index, last_20, number_counts
+
+    # Reinitialize the variables
+    shuffled_deck = list(range(1, 21))
+    current_index = 0
+    last_20 = []
+    number_counts = [0] * 20
+
+    # Reset the text entries
+    draws_entry.delete(0, tk.END)
+    reshuffle_entry.delete(0, tk.END)
+    # Clear the histogram
+    update_histogram()
+
+    # Reset labels
+    deck_label.config(text="Deck is empty.")
+    drawn_numbers_label.config(text="Drawn Numbers:")
+
+def start_draw_reshuffle():
+    global current_index
+    global shuffled_deck
+    
+    try:
+        total_draws = int(draws_entry.get())
+        draws_before_reshuffle = int(reshuffle_entry.get())
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numbers for total draws and draws before reshuffle.")
+        return
+    
+    current_index = 0  # Reset the index
+    shuffle_deck()  # Start by shuffling once
+    
+    for i in range(total_draws):
+        if i > 0 and i % draws_before_reshuffle == 0:  # Reshuffle logic
+            shuffle_deck()
+        draw_number()  # Draw a number from the deck
+    
+    update_histogram()  # Update the histogram after all draws
+    drawn_numbers_label.config(text=' '.join(map(str, last_20)))  # Update the label with the last drawn numbers
+
+
+# Create buttons to shuffle the deck, draw a number, and clear the program
 shuffle_button = tk.Button(window, text="Shuffle Deck", command=shuffle_deck)
 shuffle_button.pack(pady=20)
 
-draw_button = tk.Button(window, text="Draw Number", command=draw_number)
+draw_button = tk.Button(window, text="Start Draw", command=start_draw_reshuffle)
 draw_button.pack(pady=20)
 
-# Create labels to display the deck status and drawn numbers
-deck_label = tk.Label(window, text="Deck is empty.")
-deck_label.pack(pady=10)
+clear_button = tk.Button(window, text="Clear", command=clear_program)
+clear_button.pack(pady=20)
 
+
+# Create label to display the drawn numbers
 drawn_numbers_label = tk.Label(window, text="Drawn Numbers:")
 drawn_numbers_label.pack(pady=10)
 
