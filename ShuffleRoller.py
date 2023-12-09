@@ -86,8 +86,8 @@ def clear_program():
     number_counts = [0] * 20
 
     # Reset the text entries
-    draws_entry.delete(0, tk.END)
-    reshuffle_entry.delete(0, tk.END)
+    # draws_entry.delete(0, tk.END)
+    # reshuffle_entry.delete(0, tk.END)
     # Clear the histogram
     update_histogram()
 
